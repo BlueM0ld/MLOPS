@@ -5,9 +5,10 @@ CREATE TABLE IF NOT EXISTS user_logs (
     id SERIAL PRIMARY KEY,
     session_id VARCHAR(36) NOT NULL,
     search_query TEXT NOT NULL,
-    related_docs TEXT NOT NULL
+    related_docs TEXT NOT NULL,
+    selected_doc INT NOT NULL,
     -- unrelated_dodcs TEXT NOT NULL,
-    -- created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS documents (

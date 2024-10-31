@@ -5,7 +5,6 @@ import psycopg2
 # from psycopg2.extras import execute_values
 import uuid
 
-
 st.set_page_config(page_title="Simple Search Engine", layout="wide")
 
 
@@ -19,19 +18,19 @@ def setup_db_connection():
         return None
 
 
-def insert_document(query, session_id, related_docs):
+def insert_document(query, session_id, related_docs, selected_doc):
 
     try:
         connection = setup_db_connection()
         sql_excutor = connection.cursor()
 
         insert_doc_query = """
-            INSERT INTO user_logs (session_id, search_query, related_docs)
-            VALUES (%s,%s,%s)
+            INSERT INTO user_logs (session_id, search_query, related_docs,selected_doc)
+            VALUES (%s,%s,%s,%s)
         """
 
         sql_excutor.execute(
-            insert_doc_query, (session_id, query, related_docs))
+            insert_doc_query, (session_id, query, related_docs, selected_doc))
 
         # this persists database changes
         connection.commit()
@@ -74,7 +73,7 @@ if "session_id" not in st.session_state:
 if search_button and query:
     try:
         response = requests.post(
-            "http://fastapi:8000/search", json={"query": query})
+            "http://mlops-fastapi-1:8000/search", json={"query": query})
 
         print({"query": query})
 
@@ -82,11 +81,11 @@ if search_button and query:
             st.session_state.search_performed = True
             data = response.json()
 
+            print(data)
+
             # Store the response data in session state
             st.session_state.rel_docs = data["rel_docs"]
             st.session_state.rel_docs_sim = data["rel_docs_sim"]
-            # insert_document(query, st.session_state.session_id,
-            #                 data["rel_docs"])
         else:
             st.error(
                 f"Error: Unable to retrieve documents. Status code: {response.status_code}")
@@ -119,10 +118,10 @@ if st.session_state.search_performed:
         if len(df_similar) > 0 and selected_similar is not None:
             display_document(st.session_state.rel_docs,
                              selected_similar, "Similar")
-
-if most_similar and query and st.session_state.search_performed:
-    if selected_similar is not None:
-        insert_document(query, st.session_state.session_id, selected_similar)
+    if most_similar and query and selected_similar is not None:
+        # insert_document(query, st.session_state.session_id, df_similar.loc[selected_similar, "Document"])
+        insert_document(query, st.session_state.session_id,
+                        related_docs=st.session_state.rel_docs, selected_doc=selected_similar)
 
 
 else:
