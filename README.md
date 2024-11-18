@@ -1,3 +1,7 @@
+# MLOPS - TWO TOWERS
+
+This uses the 2 TowerModel architecture for document search similarity 
+
 Run this project
 
 Add data folder and files in app/fastapi
